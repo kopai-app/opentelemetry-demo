@@ -22,6 +22,13 @@ running on the host machine.
    npx @kopai/app start
    ```
 
+   > **Linux:** Kopai binds to `localhost` by default. For Docker containers to
+   > reach it, bind to all interfaces:
+   >
+   > ```shell
+   > HOST=0.0.0.0 npx @kopai/app start
+   > ```
+
 2. In another terminal, start the demo with Kopai:
 
    ```shell
