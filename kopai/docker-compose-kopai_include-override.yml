@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 services:
+  product-catalog:
+    platform: linux/amd64
   otel-collector:
     extra_hosts:
       - "host.docker.internal:host-gateway"
