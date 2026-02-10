@@ -1,0 +1,7 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+include:
+  - path:
+      - docker-compose.yml
+      - kopai/docker-compose-kopai_include-override.yml

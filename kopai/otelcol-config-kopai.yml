@@ -1,0 +1,15 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+exporters:
+  otlphttp/kopai:
+    endpoint: http://host.docker.internal:4318
+
+service:
+  pipelines:
+    traces:
+      exporters: [spanmetrics, otlphttp/kopai, debug]
+    metrics:
+      exporters: [otlphttp/kopai, debug]
+    logs:
+      exporters: [otlphttp/kopai, debug]

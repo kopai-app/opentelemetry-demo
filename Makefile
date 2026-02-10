@@ -247,6 +247,17 @@ else
 	@echo "Please provide a service name using `service=[service name]` or `SERVICE=[service name]`"
 endif
 
+.PHONY: start-kopai
+start-kopai:
+	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) -f docker-compose.kopai.yml up --force-recreate --remove-orphans --detach
+	@echo ""
+	@echo "OpenTelemetry Demo with Kopai is running."
+	@echo "Make sure kopai is running on the host (port 4318)."
+
+.PHONY: stop-kopai
+stop-kopai:
+	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) -f docker-compose.kopai.yml down --remove-orphans --volumes
+
 .PHONY: build-react-native-android
 build-react-native-android:
 	docker build -f src/react-native-app/android.Dockerfile --platform=linux/amd64 --output=. src/react-native-app
