@@ -4,15 +4,18 @@
 # extra settings to be merged into OpenTelemetry Collector configuration
 # do not delete this file
 
-## Example configuration for sending data to your own OTLP HTTP backend
-## Note: the spanmetrics exporter must be included in the exporters array
-## if overriding the traces pipeline.
-##
-#  exporters:
-#    otlphttp/example:
-#      endpoint: <your-endpoint-url>
-#
-#  service:
-#    pipelines:
-#      traces:
-#        exporters: [spanmetrics, otlphttp/example]
+# Export to localhost:4318
+exporters:
+  otlphttp/localhost:
+    endpoint: http://host.docker.internal:4318
+    encoding: json
+    compression: none
+
+service:
+  pipelines:
+    traces:
+      exporters: [spanmetrics, otlphttp/localhost, debug]
+    metrics:
+      exporters: [otlphttp/localhost, debug]
+    logs:
+      exporters: [otlphttp/localhost, debug]
