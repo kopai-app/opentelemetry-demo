@@ -1,6 +1,6 @@
 # OpenTelemetry Demo with Kopai
 
-This directory contains the [Kopai](https://github.com/kopai-app/kopai) vendor
+This directory contains the [Kopai](https://github.com/kopai-app/kopai-mono) vendor
 fork configuration for the
 [OpenTelemetry Astronomy Shop Demo](https://github.com/open-telemetry/opentelemetry-demo).
 
