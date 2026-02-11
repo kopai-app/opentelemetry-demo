@@ -12,7 +12,7 @@ running on the host machine.
 
 - [Docker](https://docs.docker.com/get-docker/) and
   [Docker Compose](https://docs.docker.com/compose/install/)
-- [Node.js](https://nodejs.org/) (v18+)
+- [Node.js](https://nodejs.org/) (v22.5.0+)
 
 ## Quick start
 
