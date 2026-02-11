@@ -37,15 +37,16 @@ running on the host machine.
 
 3. Browse the demo at <http://localhost:8080> and generate some traffic.
 
-4. Query your telemetry:
+4. Query your telemetry with kopai cli:
 
    ```shell
    npx @kopai/cli traces search --limit 5
    npx @kopai/cli logs search --limit 5
    npx @kopai/cli metrics discover
-   ```
 
-5. Stop the demo:
+5. Inspect telemetry in kopai dashboard at <http://localhost:8000>:
+
+6. Stop the demo:
 
    ```shell
    make stop-kopai
