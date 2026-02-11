@@ -41,10 +41,17 @@ running on the host machine.
 
    ```shell
    npx @kopai/cli traces search --limit 5
-   npx @kopai/cli logs search --limit 5
+   npx @kopai/cli logs search --service cart --fields Timestamp,Body --sort ASC
    npx @kopai/cli metrics discover
 
 5. Inspect telemetry in kopai dashboard at <http://localhost:8000>:
+
+6. Use your coding agent to get insight about the opentelemetry-demo services
+
+run your agent, then prompt:
+```
+❯ Use `@kopai/cli` to find errors in my services
+```
 
 6. Stop the demo:
 
