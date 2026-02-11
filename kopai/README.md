@@ -46,14 +46,12 @@ running on the host machine.
 
 5. Inspect telemetry in kopai dashboard at <http://localhost:8000>:
 
-6. Use your coding agent to get insight about the opentelemetry-demo services
-
-run your agent, then prompt:
+6. Use your coding agent to get insights into the opentelemetry-demo services.
 ```
 ❯ Use `@kopai/cli` to find errors in my services
 ```
 
-6. Stop the demo:
+7. Stop the demo:
 
    ```shell
    make stop-kopai
