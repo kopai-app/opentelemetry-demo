@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 exporters:
-  otlphttp/kopai:
-    endpoint: http://host.docker.internal:4318
+  otlp_http/kopai:
+    endpoint: https://demo-otlp.kopai.app
 
 service:
   pipelines:
     traces:
-      exporters: [spanmetrics, otlphttp/kopai, debug]
+      exporters: [spanmetrics, otlp_http/kopai, debug]
     metrics:
-      exporters: [otlphttp/kopai, debug]
+      exporters: [otlp_http/kopai, debug]
     logs:
-      exporters: [otlphttp/kopai, debug]
+      exporters: [otlp_http/kopai, debug]
