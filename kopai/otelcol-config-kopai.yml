@@ -3,12 +3,15 @@
 
 exporters:
   otlphttp/kopai:
-    endpoint: http://host.docker.internal:4318
+    # endpoint: http://host.docker.internal:4318
+    endpoint: https://otlp-http.kopai.app
+    headers:
+      Authorization: "Bearer ${env:KOPAI_BACKEND_TOKEN}"
 
 service:
   pipelines:
     traces:
-      exporters: [spanmetrics, otlphttp/kopai, debug]
+      exporters: [otlp_grpc/jaeger, spanmetrics, otlphttp/kopai, debug]
     metrics:
       exporters: [otlphttp/kopai, debug]
     logs:

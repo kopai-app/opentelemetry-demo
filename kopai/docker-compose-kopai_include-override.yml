@@ -12,3 +12,5 @@ services:
       - ${DOCKER_SOCK}:/var/run/docker.sock:ro
       - ${OTEL_COLLECTOR_CONFIG}:/etc/otelcol-config.yml
       - ./kopai/otelcol-config-kopai.yml:/etc/otelcol-config-extras.yml
+    environment:
+      - KOPAI_BACKEND_TOKEN
