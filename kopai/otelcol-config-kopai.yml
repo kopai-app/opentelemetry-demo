@@ -1,15 +1,25 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
 
+# Kopai customization layer for the OTel Collector. Mounted over
+# /etc/otelcol-config-extras.yml by compose.kopai.yaml, so it is loaded last.
+#
+# IMPORTANT: The collector merges config files but REPLACES arrays rather than
+# appending. Each pipeline below therefore repeats the exporters set by the core
+# config (src/otel-collector/otelcol-config.yml) alongside otlp_http/kopai.
+#
+# The profiles pipeline is deliberately left alone: Kopai does not ingest OTLP
+# profiles, so it keeps the upstream default of [debug].
+
 exporters:
-  otlphttp/kopai:
+  otlp_http/kopai:
     endpoint: http://host.docker.internal:4318
 
 service:
   pipelines:
     traces:
-      exporters: [spanmetrics, otlphttp/kopai, debug]
+      exporters: [debug, span_metrics, otlp_http/kopai]
     metrics:
-      exporters: [otlphttp/kopai, debug]
+      exporters: [debug, otlp_http/kopai]
     logs:
-      exporters: [otlphttp/kopai, debug]
+      exporters: [debug, otlp_http/kopai]
