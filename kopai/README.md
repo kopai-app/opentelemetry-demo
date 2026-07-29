@@ -15,7 +15,12 @@ Prometheus, OpenSearch, Grafana, and the OpAMP server are not started.
 
 - [Docker](https://docs.docker.com/get-docker/) and
   [Docker Compose](https://docs.docker.com/compose/install/)
-- [Node.js](https://nodejs.org/) (v22.5.0+)
+- [Node.js](https://nodejs.org/) (v22.13.0+). Kopai stores telemetry through
+  the built-in `node:sqlite` module, which does not exist before v22.5.0 and
+  requires `--experimental-sqlite` until v22.13.0 (v23.4.0 on the
+  odd-numbered line). The published `@kopai/app` package understates this as
+  `engines: ">=20"`, and npm does not enforce that field by default, so an
+  older Node install succeeds and then fails at startup.
 
 ## Quick start
 
