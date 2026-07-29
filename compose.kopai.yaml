@@ -1,0 +1,26 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+# Kopai layer: swaps the collector's extras config for the Kopai exporter config
+# and gives the collector container a route back to the host, where Kopai
+# listens on port 4318 for OTLP/HTTP.
+#
+# Kopai *is* the observability backend here, so this layer replaces
+# compose.observability.yaml rather than stacking on top of it.
+#
+# Usage:
+#   docker compose -f compose.yaml -f compose.full.yaml -f compose.kopai.yaml up
+#
+# See kopai/README.md.
+
+services:
+  otel-collector:
+    # Reach Kopai on the host. Docker Desktop resolves host.docker.internal on
+    # its own; Linux needs the explicit host-gateway mapping.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Compose merges volumes keyed by container path, so this swaps only the
+    # extras stub. Every --config flag from compose.yaml and compose.full.yaml
+    # still applies, and otelcol-config-extras.yml is already loaded last.
+    volumes:
+      - ./kopai/otelcol-config-kopai.yml:/etc/otelcol-config-extras.yml
