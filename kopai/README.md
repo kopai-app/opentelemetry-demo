@@ -38,8 +38,15 @@ Prometheus, OpenSearch, and Grafana are not started.
    make start-kopai
    ```
 
-   For a lighter run that skips the Kafka group (accounting, fraud-detection),
-   use `make start-kopai-minimal`.
+   Other run modes:
+
+   | Target | Services | Approx. memory |
+   |--------|----------|----------------|
+   | `make start-kopai` | Core demo + Kafka group (accounting, fraud-detection) | ~4.1 GiB |
+   | `make start-kopai-minimal` | Core demo only, no Kafka group | ~3.1 GiB |
+   | `make start-kopai-agentic` | `start-kopai` + agent, chatbot, and MCP services | ~5.6 GiB |
+
+   All three stop with `make stop-kopai`.
 
 3. Browse the demo at <http://localhost:8080> and generate some traffic.
 
@@ -103,6 +110,38 @@ plugs into those two seams and modifies no upstream files:
 The collector merges config files but **replaces** arrays rather than appending
 to them, so each pipeline in `otelcol-config-kopai.yml` repeats the exporters
 defined by the core config alongside `otlp_http/kopai`.
+
+### GenAI services
+
+`make start-kopai-agentic` adds upstream's `agent`, `chatbot`, and `mcp`
+services on top of `start-kopai`, so Kopai also receives GenAI telemetry — LLM
+spans, token usage, and MCP tool calls. Chat with the demo at
+<http://localhost:8080/chatbot/>.
+
+These are a separate target rather than part of `start-kopai` for two reasons:
+they add roughly 1.5 GiB of memory limits, and they depend on an LLM.
+
+**LLM calls are replayed, not live, by default.** `.env` ships with
+`USE_VCR=True`, `LLM_BASE_URL=https://local-llm.com`, and an empty `API_KEY`;
+requests are served from recorded cassettes in
+`src/agent/fixtures/vcr_cassettes/`. Cassettes exist only for the `LLM_MODEL`
+values they were recorded against (`azure/gpt-5.5` and `claude-opus-4-7`), and
+matching is fuzzy via `VCR_MATCH_THRESHOLD`. Point `LLM_MODEL` at anything else
+while `USE_VCR=True` and the agent has nothing to replay.
+
+For real LLM traffic, set these in `.env.override`, the file upstream reserves
+for local overrides:
+
+```shell
+USE_VCR=False
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-4o-mini
+API_KEY=<your key>
+```
+
+The agent passes `API_KEY` through as `OPENAI_API_KEY`, so any OpenAI-compatible
+endpoint works. Both `.env` and `.env.override` are tracked in git — the latter
+carries a "do not push" banner — so take care not to commit a real key.
 
 ### Running Kopai alongside the bundled stack
 

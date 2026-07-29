@@ -395,9 +395,23 @@ start-kopai-minimal:
 	@echo "Go to http://localhost:8080 for the demo UI."
 	@echo "Go to http://localhost:8000 for the Kopai dashboard."
 
+.PHONY: start-kopai-agentic
+start-kopai-agentic:
+	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) $(DOCKER_COMPOSE_FILES_FULL) $(DOCKER_COMPOSE_FILES_KOPAI) $(DOCKER_COMPOSE_FILES_AGENT) up --force-recreate --remove-orphans --detach
+	@echo ""
+	@echo "OpenTelemetry Demo with Kopai, agent, mcp and chatbot is running."
+	@echo "Make sure Kopai is running on the host (port 4318): npx @kopai/app start"
+	@echo "Go to http://localhost:8080 for the demo UI."
+	@echo "Go to http://localhost:8080/chatbot/ for interacting with demo application using an agent."
+	@echo "Go to http://localhost:8000 for the Kopai dashboard."
+	@echo ""
+	@echo "LLM calls replay from cassettes by default (USE_VCR=True)."
+	@echo "Set API_KEY, LLM_BASE_URL and LLM_MODEL in .env.override for real LLM traffic."
+
 .PHONY: stop-kopai
 stop-kopai:
 	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) $(DOCKER_COMPOSE_FILES_FULL) $(DOCKER_COMPOSE_FILES_KOPAI) down --remove-orphans --volumes
+	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) $(DOCKER_COMPOSE_FILES_FULL) $(DOCKER_COMPOSE_FILES_KOPAI) $(DOCKER_COMPOSE_FILES_AGENT) down --remove-orphans --volumes
 	@echo ""
 	@echo "OpenTelemetry Demo with Kopai is stopped."
 
