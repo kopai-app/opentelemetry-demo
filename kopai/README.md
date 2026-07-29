@@ -9,7 +9,7 @@ signals (traces, metrics, logs) from the demo's collector to a Kopai instance
 running on the host machine.
 
 Kopai takes the place of the demo's bundled observability stack, so Jaeger,
-Prometheus, OpenSearch, and Grafana are not started.
+Prometheus, OpenSearch, Grafana, and the OpAMP server are not started.
 
 ## Prerequisites
 
@@ -41,8 +41,8 @@ Prometheus, OpenSearch, and Grafana are not started.
    Other run modes:
 
    | Target | Services | Approx. memory |
-   |--------|----------|----------------|
-   | `make start-kopai` | Core demo + Kafka group (accounting, fraud-detection) | ~4.1 GiB |
+   | --- | --- | --- |
+   | `make start-kopai` | Core demo + Kafka, accounting, fraud-detection | ~4.1 GiB |
    | `make start-kopai-minimal` | Core demo only, no Kafka group | ~3.1 GiB |
    | `make start-kopai-agentic` | `start-kopai` + agent, chatbot, and MCP services | ~5.6 GiB |
 
@@ -99,7 +99,7 @@ Prometheus, OpenSearch, and Grafana are not started.
 Upstream splits its Compose setup into layers (`compose.yaml`,
 `compose.full.yaml`, `compose.observability.yaml`) and loads a customization
 file, `otelcol-config-extras.yml`, last in the collector's config chain. Kopai
-plugs into those two seams and modifies no upstream files:
+plugs into those two seams:
 
 - `compose.kopai.yaml` mounts `kopai/otelcol-config-kopai.yml` over the
   collector's extras config and adds a `host.docker.internal` mapping so the
@@ -110,6 +110,10 @@ plugs into those two seams and modifies no upstream files:
 The collector merges config files but **replaces** arrays rather than appending
 to them, so each pipeline in `otelcol-config-kopai.yml` repeats the exporters
 defined by the core config alongside `otlp_http/kopai`.
+
+`Makefile` is the only upstream file this fork changes, and only to add the
+`start-kopai*` and `stop-kopai` targets. Everything else is new files, which is
+what keeps merges from upstream cheap.
 
 ### GenAI services
 
@@ -152,14 +156,53 @@ docker compose --env-file .env --env-file .env.override \
   -f compose.yaml -f compose.full.yaml -f compose.observability.yaml -f compose.kopai.yaml up
 ```
 
-The observability layer sets its own pipeline exporters, so also add
-`otlp_grpc/jaeger`, `otlp_http/prometheus`, and `opensearch` to the matching
-pipelines in `otelcol-config-kopai.yml` — otherwise the Kopai layer, which loads
-last, drops them.
+The observability layer sets its own pipeline exporters, and the Kopai layer
+loads after it, so those exporters must be repeated or they are dropped. Use
+these pipelines in `otelcol-config-kopai.yml` for that combination:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      exporters: [debug, span_metrics, otlp_grpc/jaeger, otlp_http/kopai]
+    metrics:
+      exporters: [debug, otlp_http/prometheus, otlp_http/kopai]
+    logs:
+      exporters: [debug, opensearch, otlp_http/kopai]
+```
+
+## Troubleshooting
+
+**Nothing arrives in Kopai.** Check what the collector is doing:
+
+```shell
+docker logs otel-collector 2>&1 | grep kopai
+```
+
+An `Exporting failed` line naming `otlp_http/kopai` means the collector is
+configured correctly but cannot deliver. If you see no `otlp_http/kopai` lines
+at all, the extras config was not picked up — confirm the mount with
+`docker compose ... config` and look for `otelcol-config-kopai.yml`.
+
+**Something else is already on port 4318.** Both Kopai and the demo's own
+collector speak OTLP, and other local tooling (Kubernetes clusters, vendor
+agents) often claims 4318 too. A `404` or `401` in the collector's export
+errors means *something* answered, but not Kopai. Find the owner:
+
+```shell
+lsof -nP -iTCP:4318 -sTCP:LISTEN
+```
+
+Free the port, or start Kopai elsewhere and update the `endpoint` in
+`otelcol-config-kopai.yml` to match.
+
+**Connection refused on Linux.** Kopai binds to `localhost` by default, which
+containers cannot reach. Start it with `HOST=0.0.0.0 npx @kopai/app start`.
 
 ## Files
 
 | File | Description |
-|------|-------------|
+| --- | --- |
 | `otelcol-config-kopai.yml` | Collector extras layer that exports traces, metrics, and logs to Kopai via OTLP/HTTP |
 | `../compose.kopai.yaml` | Compose layer that mounts the config above and routes the collector to the host |
+| `../Makefile` | Adds the `start-kopai`, `start-kopai-minimal`, `start-kopai-agentic`, and `stop-kopai` targets |
