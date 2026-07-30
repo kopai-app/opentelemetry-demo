@@ -68,7 +68,7 @@ Prometheus, OpenSearch, Grafana, and the OpAMP server are not started.
 6. Use your coding agent to get insights into the demo services:
 
    ```text
-   ❯ Use `@kopai/cli` to find errors in my services
+   > Use `@kopai/cli` to find errors in my services
    ```
 
 7. Stop the demo:
@@ -80,25 +80,36 @@ Prometheus, OpenSearch, Grafana, and the OpAMP server are not started.
 ## How it works
 
 ```text
-┌───────────────────────────────────────────────────┐
-│  Docker (OpenTelemetry Demo)                      │
-│                                                   │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │ frontend │  │ cart     │  │ checkout │  ...    │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘         │
-│       │             │             │               │
-│       └─────────────┴─────────────┘               │
-│                     │                             │
-│             ┌───────▼────────┐                    │
-│             │ otel-collector │                    │
-│             └───────┬────────┘                    │
-│                     │ OTLP/HTTP                   │
-└─────────────────────┼─────────────────────────────┘
-                      │ host.docker.internal:4318
-              ┌───────▼────────┐
-              │     Kopai      │
-              │  (host machine)│
-              └────────────────┘
++----------------------------------------------------+
+|  Docker Compose Network                            |
+|                                                    |
+|  +-------------------------------+                 |
+|  |  Astronomy Shop Demo          |                 |
+|  |  (10+ microservices)          |                 |
+|  |                               |                 |
+|  |  All services instrumented    |                 |
+|  |  with OpenTelemetry           |                 |
+|  +-------------------------------+                 |
+|                  |                                 |
+|                  | OTLP (traces, metrics, logs)    |
+|                  v                                 |
+|  +-------------------------------+                 |
+|  |  OTel Collector               |                 |
+|  |  (in Docker)                  |                 |
+|  +-------------------------------+                 |
+|                  |                                 |
+|                  | OTLP/HTTP                       |
+|                  v                                 |
+|       host.docker.internal:4318                    |
++----------------------------------------------------+
+                  |
+                  v
++------------------------------------+
+|  @kopai/app (on host machine)      |
+|                                    |
+|  OTel collector: localhost:4318    |
+|  Dashboard:      localhost:8000    |
++------------------------------------+
 ```
 
 Upstream splits its Compose setup into layers (`compose.yaml`,
@@ -123,7 +134,7 @@ what keeps merges from upstream cheap.
 ### GenAI services
 
 `make start-kopai-agentic` adds upstream's `agent`, `chatbot`, and `mcp`
-services on top of `start-kopai`, so Kopai also receives GenAI telemetry — LLM
+services on top of `start-kopai`, so Kopai also receives GenAI telemetry: LLM
 spans, token usage, and MCP tool calls. Chat with the demo at
 <http://localhost:8080/chatbot/>.
 
@@ -149,8 +160,8 @@ API_KEY=<your key>
 ```
 
 The agent passes `API_KEY` through as `OPENAI_API_KEY`, so any OpenAI-compatible
-endpoint works. Both `.env` and `.env.override` are tracked in git — the latter
-carries a "do not push" banner — so take care not to commit a real key.
+endpoint works. Both `.env` and `.env.override` are tracked in git (the latter
+carries a "do not push" banner), so take care not to commit a real key.
 
 ### Running Kopai alongside the bundled stack
 
@@ -186,7 +197,7 @@ docker logs otel-collector 2>&1 | grep kopai
 
 An `Exporting failed` line naming `otlp_http/kopai` means the collector is
 configured correctly but cannot deliver. If you see no `otlp_http/kopai` lines
-at all, the extras config was not picked up — confirm the mount with
+at all, the extras config was not picked up; confirm the mount with
 `docker compose ... config` and look for `otelcol-config-kopai.yml`.
 
 **Something else is already on port 4318.** Both Kopai and the demo's own
